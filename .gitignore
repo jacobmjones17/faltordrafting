@@ -1,2 +1,24 @@
 # Local Netlify folder
 .netlify
+
+# Node.js dependencies
+node_modules/
+vue-frontend/node_modules/
+go-backend/node_modules/
+
+# Build outputs
+vue-frontend/dist/
+*.log
+npm-debug.log*
+
+# Environment variables
+.env
+go-backend/.env
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
