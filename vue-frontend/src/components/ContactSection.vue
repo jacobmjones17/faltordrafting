@@ -12,7 +12,11 @@
 
       <div id="quote" class="contact-grid">
         <div class="card">
-          <form class="contact-form" @submit.prevent="submitForm">
+          <form class="contact-form" @submit.prevent="submitForm" name="contact" method="POST" netlify netlify-honeypot="bot-field">
+            <!-- Hidden fields for Netlify -->
+            <input type="hidden" name="form-name" value="contact" />
+            <input type="hidden" name="bot-field" />
+            
             <div v-if="formStatus.message" 
                  :class="['form-message', formStatus.type]">
               {{ formStatus.message }}
@@ -24,6 +28,7 @@
                 <input 
                   id="name" 
                   v-model="form.name" 
+                  name="name"
                   type="text" 
                   required 
                   :disabled="isSubmitting" 
@@ -34,6 +39,7 @@
                 <input 
                   id="email" 
                   v-model="form.email" 
+                  name="email"
                   type="email" 
                   required 
                   :disabled="isSubmitting" 
@@ -69,6 +75,7 @@
                 <select 
                   id="projectType" 
                   v-model="form.projectType" 
+                  name="projectType"
                   required 
                   :disabled="isSubmitting"
                 >
@@ -116,6 +123,7 @@
               <textarea 
                 id="message" 
                 v-model="form.message" 
+                name="message"
                 required 
                 placeholder="Describe your project, goals, and any important details."
                 :disabled="isSubmitting"
@@ -221,20 +229,23 @@ export default {
           formData.append('files', file)
         })
         
-        // Make API call to Go backend
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080'
-        const response = await axios.post(`${apiUrl}/api/contact`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
+        // Add form name for Netlify
+        formData.append('form-name', 'contact')
+        
+        // Submit to Netlify Forms
+        const response = await fetch('/', {
+          method: 'POST',
+          body: formData
         })
         
-        if (response.status === 200) {
+        if (response.ok) {
           this.formStatus = {
-            message: 'Thank you! Your message has been sent successfully.',
+            message: 'Thank you! Your message has been sent successfully. We will contact you soon!',
             type: 'success'
           }
           this.resetForm()
+        } else {
+          throw new Error('Form submission failed')
         }
       } catch (error) {
         console.error('Form submission error:', error)
