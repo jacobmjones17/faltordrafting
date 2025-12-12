@@ -222,7 +222,8 @@ export default {
         })
         
         // Make API call to Go backend
-        const response = await axios.post('http://localhost:8080/api/contact', formData, {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080'
+        const response = await axios.post(`${apiUrl}/api/contact`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
