@@ -1,0 +1,13 @@
+[build]
+  publish = "vue-frontend/dist"
+  command = "cd vue-frontend && npm run build"
+
+[dev]
+  port = 8888
+
+[[forms]]
+  name = "contact"
+  
+[forms.settings]
+  # Email notifications will go to the site owner's email (faltorco.ben@gmail.com)
+  # This is configured in the Netlify dashboard under Forms settings
