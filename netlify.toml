@@ -1,6 +1,6 @@
 [build]
   publish = "vue-frontend/dist"
-  command = "cd vue-frontend && npm run build"
+  command = "cd vue-frontend && npm install && npm run build"
 
 [dev]
   port = 8888
