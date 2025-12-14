@@ -262,42 +262,27 @@ export default {
       this.formStatus = { message: '', type: '' }
       
       try {
-        // Encode form data for Netlify
-        const encode = (data) => {
-          return Object.keys(data)
-            .map(key => encodeURIComponent(key) + "=" + encodeURIComponent(data[key]))
-            .join("&")
-        }
+        // Use the actual form element to submit
+        const form = document.querySelector('form[name="contact"]')
         
-        // Prepare form data
-        const formData = {
-          'form-name': 'contact',
-          'bot-field': this.form.botField,
-          'name': this.form.name,
-          'email': this.form.email,
-          'phone': this.form.phone,
-          'location': this.form.location,
-          'projectType': this.form.projectType,
-          'timeline': this.form.timeline,
-          'budget': this.form.budget,
-          'message': this.form.message
-        }
+        // Create a FormData object from the form
+        const formData = new FormData(form)
         
-        // Submit to Netlify Forms
+        // Submit to Netlify Forms using fetch
         const response = await fetch('/', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: encode(formData)
+          body: new URLSearchParams(formData).toString()
         })
         
-        if (response.ok) {
+        if (response.ok || response.status === 200) {
           this.formStatus = {
             message: 'Thank you! Your message has been sent successfully. We will contact you soon!',
             type: 'success'
           }
           this.resetForm()
         } else {
-          throw new Error('Form submission failed')
+          throw new Error(`Form submission failed with status: ${response.status}`)
         }
       } catch (error) {
         console.error('Form submission error:', error)
