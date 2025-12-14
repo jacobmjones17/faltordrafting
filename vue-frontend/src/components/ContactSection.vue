@@ -262,34 +262,32 @@ export default {
       this.formStatus = { message: '', type: '' }
       
       try {
-        // Create FormData object
-        const formData = new FormData()
+        // Encode form data for Netlify
+        const encode = (data) => {
+          return Object.keys(data)
+            .map(key => encodeURIComponent(key) + "=" + encodeURIComponent(data[key]))
+            .join("&")
+        }
         
-        // Add form name first (required by Netlify)
-        formData.append('form-name', 'contact')
-        
-        // Add honeypot field (should remain empty)
-        formData.append('bot-field', this.form.botField)
-        
-        // Add all form fields
-        formData.append('name', this.form.name)
-        formData.append('email', this.form.email)
-        formData.append('phone', this.form.phone)
-        formData.append('location', this.form.location)
-        formData.append('projectType', this.form.projectType)
-        formData.append('timeline', this.form.timeline)
-        formData.append('budget', this.form.budget)
-        formData.append('message', this.form.message)
-        
-        // Add files if any
-        this.files.forEach(file => {
-          formData.append('files', file)
-        })
+        // Prepare form data
+        const formData = {
+          'form-name': 'contact',
+          'bot-field': this.form.botField,
+          'name': this.form.name,
+          'email': this.form.email,
+          'phone': this.form.phone,
+          'location': this.form.location,
+          'projectType': this.form.projectType,
+          'timeline': this.form.timeline,
+          'budget': this.form.budget,
+          'message': this.form.message
+        }
         
         // Submit to Netlify Forms
         const response = await fetch('/', {
           method: 'POST',
-          body: formData
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: encode(formData)
         })
         
         if (response.ok) {
