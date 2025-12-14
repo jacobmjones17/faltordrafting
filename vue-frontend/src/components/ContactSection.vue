@@ -12,11 +12,7 @@
 
       <div id="quote" class="contact-grid">
         <div class="card">
-          <form class="contact-form" @submit.prevent="submitForm" name="contact">
-            <!-- Hidden fields for Netlify -->
-            <input type="hidden" name="form-name" value="contact" />
-            <input type="hidden" name="bot-field" v-model="form.botField" />
-            
+          <form class="contact-form" @submit.prevent="submitForm">
             <div v-if="formStatus.message" 
                  :class="['form-message', formStatus.type]">
               {{ formStatus.message }}
@@ -207,7 +203,6 @@ export default {
         type: ''
       },
       form: {
-        botField: '', // honeypot field
         name: '',
         email: '',
         phone: '',
@@ -310,7 +305,6 @@ export default {
     
     resetForm() {
       this.form = {
-        botField: '',
         name: '',
         email: '',
         phone: '',
