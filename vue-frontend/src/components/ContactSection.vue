@@ -12,10 +12,10 @@
 
       <div id="quote" class="contact-grid">
         <div class="card">
-          <form class="contact-form" @submit.prevent="submitForm" name="contact" method="POST" netlify netlify-honeypot="bot-field">
+          <form class="contact-form" @submit.prevent="submitForm" name="contact">
             <!-- Hidden fields for Netlify -->
             <input type="hidden" name="form-name" value="contact" />
-            <input type="hidden" name="bot-field" />
+            <input type="hidden" name="bot-field" v-model="form.botField" />
             
             <div v-if="formStatus.message" 
                  :class="['form-message', formStatus.type]">
@@ -53,7 +53,11 @@
                 <input 
                   id="phone" 
                   v-model="form.phone" 
+                  name="phone"
                   type="tel" 
+                  placeholder="555-123-4567"
+                  @input="formatPhoneInput"
+                  maxlength="12"
                   :disabled="isSubmitting" 
                 />
               </div>
@@ -62,6 +66,7 @@
                 <input 
                   id="location" 
                   v-model="form.location" 
+                  name="location"
                   type="text" 
                   placeholder="e.g., Goldsboro, Eastern NC" 
                   :disabled="isSubmitting" 
@@ -95,6 +100,7 @@
                 <select 
                   id="timeline" 
                   v-model="form.timeline" 
+                  name="timeline"
                   :disabled="isSubmitting"
                 >
                   <option value="">Select one</option>
@@ -108,13 +114,18 @@
 
             <div class="field-group">
               <label for="budget">Approximate Construction Budget (Optional)</label>
-              <input 
-                id="budget" 
-                v-model="form.budget" 
-                type="text" 
-                placeholder="e.g., $250,000 – $400,000" 
-                :disabled="isSubmitting" 
-              />
+              <div class="budget-input-wrapper">
+                <span class="budget-prefix">$</span>
+                <input 
+                  id="budget" 
+                  v-model="form.budget" 
+                  name="budget"
+                  type="text" 
+                  placeholder="250,000" 
+                  @input="formatBudgetInput"
+                  :disabled="isSubmitting" 
+                />
+              </div>
               <p class="hint">This simply helps align the design with realistic construction costs.</p>
             </div>
 
@@ -134,6 +145,7 @@
               <label for="sketches">Upload Your Sketches / Files</label>
               <input 
                 id="sketches" 
+                name="files"
                 type="file" 
                 multiple 
                 @change="handleFileUpload"
@@ -195,6 +207,7 @@ export default {
         type: ''
       },
       form: {
+        botField: '', // honeypot field
         name: '',
         email: '',
         phone: '',
@@ -212,25 +225,66 @@ export default {
       this.files = Array.from(event.target.files)
     },
     
+    formatPhoneInput(event) {
+      // Remove all non-numeric characters
+      let value = event.target.value.replace(/\D/g, '')
+      
+      // Limit to 10 digits
+      value = value.substring(0, 10)
+      
+      // Format as XXX-XXX-XXXX
+      if (value.length >= 6) {
+        value = `${value.slice(0, 3)}-${value.slice(3, 6)}-${value.slice(6)}`
+      } else if (value.length >= 3) {
+        value = `${value.slice(0, 3)}-${value.slice(3)}`
+      }
+      
+      this.form.phone = value
+    },
+    
+    formatBudgetInput(event) {
+      // Remove all non-numeric characters except commas
+      let value = event.target.value.replace(/[^\d,]/g, '')
+      
+      // Remove existing commas
+      value = value.replace(/,/g, '')
+      
+      // Add commas for thousands
+      if (value) {
+        value = parseInt(value, 10).toLocaleString('en-US')
+      }
+      
+      this.form.budget = value
+    },
+    
     async submitForm() {
       this.isSubmitting = true
       this.formStatus = { message: '', type: '' }
       
       try {
+        // Create FormData object
         const formData = new FormData()
         
-        // Add form fields
-        Object.keys(this.form).forEach(key => {
-          formData.append(key, this.form[key])
-        })
+        // Add form name first (required by Netlify)
+        formData.append('form-name', 'contact')
         
-        // Add files
+        // Add honeypot field (should remain empty)
+        formData.append('bot-field', this.form.botField)
+        
+        // Add all form fields
+        formData.append('name', this.form.name)
+        formData.append('email', this.form.email)
+        formData.append('phone', this.form.phone)
+        formData.append('location', this.form.location)
+        formData.append('projectType', this.form.projectType)
+        formData.append('timeline', this.form.timeline)
+        formData.append('budget', this.form.budget)
+        formData.append('message', this.form.message)
+        
+        // Add files if any
         this.files.forEach(file => {
           formData.append('files', file)
         })
-        
-        // Add form name for Netlify
-        formData.append('form-name', 'contact')
         
         // Submit to Netlify Forms
         const response = await fetch('/', {
@@ -260,6 +314,7 @@ export default {
     
     resetForm() {
       this.form = {
+        botField: '',
         name: '',
         email: '',
         phone: '',
@@ -300,5 +355,25 @@ export default {
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.budget-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.budget-prefix {
+  position: absolute;
+  left: 12px;
+  color: #333;
+  font-weight: 500;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.budget-input-wrapper input {
+  padding-left: 28px;
+  width: 100%;
 }
 </style>
