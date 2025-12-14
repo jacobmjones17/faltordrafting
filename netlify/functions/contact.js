@@ -286,6 +286,16 @@ This email was sent from the FALTOR Consulting contact form.
 
   // Send email
   try {
+    // Verify SMTP configuration exists
+    if (!smtpConfig.host || !smtpConfig.auth.user || !smtpConfig.auth.pass) {
+      console.error('SMTP configuration missing:', {
+        hasHost: !!smtpConfig.host,
+        hasUser: !!smtpConfig.auth.user,
+        hasPass: !!smtpConfig.auth.pass
+      });
+      throw new Error('Email configuration is incomplete. Please check environment variables.');
+    }
+
     await transporter.sendMail(mailOptions);
     
     return {
@@ -302,6 +312,7 @@ This email was sent from the FALTOR Consulting contact form.
     };
   } catch (error) {
     console.error('Email error:', error);
+    console.error('Error stack:', error.stack);
     
     return {
       statusCode: 500,
@@ -311,7 +322,8 @@ This email was sent from the FALTOR Consulting contact form.
       },
       body: JSON.stringify({
         error: 'Failed to send email',
-        details: error.message
+        details: error.message,
+        hint: 'Check Netlify function logs for more details'
       })
     };
   }
