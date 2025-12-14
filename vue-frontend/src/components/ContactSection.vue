@@ -262,27 +262,40 @@ export default {
       this.formStatus = { message: '', type: '' }
       
       try {
-        // Use the actual form element to submit
-        const form = document.querySelector('form[name="contact"]')
+        // Prepare the data for the Go backend
+        const formData = {
+          name: this.form.name,
+          email: this.form.email,
+          phone: this.form.phone,
+          location: this.form.location,
+          projectType: this.form.projectType,
+          timeline: this.form.timeline,
+          budget: this.form.budget,
+          message: this.form.message
+        }
+
+        // Get API URL from environment or use production URL
+        const apiUrl = import.meta.env.VITE_API_URL || 'https://your-railway-app.railway.app'
         
-        // Create a FormData object from the form
-        const formData = new FormData(form)
-        
-        // Submit to Netlify Forms using fetch
-        const response = await fetch('/', {
+        // Submit to Go backend
+        const response = await fetch(`${apiUrl}/api/contact`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams(formData).toString()
+          headers: { 
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
         })
+
+        const data = await response.json()
         
-        if (response.ok || response.status === 200) {
+        if (response.ok) {
           this.formStatus = {
             message: 'Thank you! Your message has been sent successfully. We will contact you soon!',
             type: 'success'
           }
           this.resetForm()
         } else {
-          throw new Error(`Form submission failed with status: ${response.status}`)
+          throw new Error(data.message || 'Form submission failed')
         }
       } catch (error) {
         console.error('Form submission error:', error)
