@@ -1,6 +1,9 @@
 [build]
   publish = "vue-frontend/dist"
-  command = "cd vue-frontend && npm install && npm run build"
+  command = "cd vue-frontend && npm install && npm run build && cd ../netlify/functions && npm install"
 
 [dev]
   port = 8888
+
+[functions]
+  directory = "netlify/functions"

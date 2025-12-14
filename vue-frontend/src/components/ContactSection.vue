@@ -12,7 +12,11 @@
 
       <div id="quote" class="contact-grid">
         <div class="card">
-          <form class="contact-form" @submit.prevent="submitForm">
+          <form class="contact-form" @submit.prevent="submitForm" name="contact">
+            <!-- Hidden fields for Netlify -->
+            <input type="hidden" name="form-name" value="contact" />
+            <input type="hidden" name="bot-field" v-model="form.botField" />
+            
             <div v-if="formStatus.message" 
                  :class="['form-message', formStatus.type]">
               {{ formStatus.message }}
@@ -203,6 +207,7 @@ export default {
         type: ''
       },
       form: {
+        botField: '', // honeypot field
         name: '',
         email: '',
         phone: '',
@@ -257,28 +262,29 @@ export default {
       this.formStatus = { message: '', type: '' }
       
       try {
-        // Prepare the data for the Go backend
-        const formData = {
-          name: this.form.name,
-          email: this.form.email,
-          phone: this.form.phone,
-          location: this.form.location,
-          projectType: this.form.projectType,
-          timeline: this.form.timeline,
-          budget: this.form.budget,
-          message: this.form.message
-        }
-
-        // Get API URL from environment or use production URL
-        const apiUrl = import.meta.env.VITE_API_URL || 'https://your-railway-app.railway.app'
+        // Create FormData to handle files
+        const formData = new FormData()
         
-        // Submit to Go backend
-        const response = await fetch(`${apiUrl}/api/contact`, {
+        // Add all form fields
+        formData.append('name', this.form.name)
+        formData.append('email', this.form.email)
+        formData.append('phone', this.form.phone)
+        formData.append('location', this.form.location)
+        formData.append('projectType', this.form.projectType)
+        formData.append('timeline', this.form.timeline)
+        formData.append('budget', this.form.budget)
+        formData.append('message', this.form.message)
+        
+        // Add files if any
+        this.files.forEach(file => {
+          formData.append('files', file)
+        })
+        
+        // Submit to Netlify Function
+        const response = await fetch('/.netlify/functions/contact', {
           method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(formData)
+          body: formData
+          // Don't set Content-Type header - let browser set it with boundary
         })
 
         const data = await response.json()
@@ -305,6 +311,7 @@ export default {
     
     resetForm() {
       this.form = {
+        botField: '',
         name: '',
         email: '',
         phone: '',

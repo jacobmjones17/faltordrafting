@@ -18,6 +18,35 @@
   </head>
   <body>
     <div id="app"></div>
+    
+    <!-- Hidden form for Netlify detection -->
+    <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="contact" />
+      <input type="hidden" name="bot-field" />
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <input type="tel" name="phone" />
+      <input type="text" name="location" />
+      <select name="projectType">
+        <option>Custom house plan</option>
+        <option>Interior remodel</option>
+        <option>Addition / porch</option>
+        <option>Garage / accessory building</option>
+        <option>As-built drawings</option>
+        <option>Site / plot plan</option>
+        <option>3D rendering only</option>
+        <option>Other drafting services</option>
+      </select>
+      <select name="timeline">
+        <option>As soon as possible</option>
+        <option>Within 1–2 months</option>
+        <option>Within 3–6 months</option>
+        <option>Flexible / just planning</option>
+      </select>
+      <input type="text" name="budget" />
+      <textarea name="message"></textarea>
+    </form>
+    
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
